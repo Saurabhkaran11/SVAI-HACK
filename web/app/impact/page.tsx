@@ -23,16 +23,16 @@ function Score({ value, level }: { value: number; level: string }) {
   const rounded = useTransform(mv, (v) => Math.round(v));
   const [n, setN] = useState(0);
   useEffect(() => { const c = animate(mv, value, { duration: 1.2, ease: "easeOut" }); const u = rounded.on("change", setN); return () => { c.stop(); u(); }; }, [value, mv, rounded]);
-  const color = level === "High" ? "var(--bad)" : level === "Medium" ? "var(--warn)" : "var(--good)";
+  const color = "var(--accent)";
   return (
     <div className="glass stat" style={{ textAlign: "center" }}>
       <svg viewBox="0 0 120 120" width="120" height="120">
-        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="10" />
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" strokeWidth="10" />
         <motion.circle cx="60" cy="60" r="50" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
           transform="rotate(-90 60 60)" initial={{ pathLength: 0 }} animate={{ pathLength: value / 100 }} transition={{ duration: 1.2 }} />
-        <text x="60" y="66" textAnchor="middle" fill="#fff" fontSize="28" fontWeight="800">{n}</text>
+        <text x="60" y="66" textAnchor="middle" fill="#111827" fontSize="28" fontWeight="800">{n}</text>
       </svg>
-      <b style={{ fontSize: 18, color }}>{level} risk</b>
+      <b style={{ fontSize: 16, color: "var(--text)" }}>{level} risk</b>
     </div>
   );
 }
@@ -88,7 +88,7 @@ export default function ImpactPage() {
           <div className="muted" style={{ marginTop: 10 }}>Walking the dependency graph…</div>
         </div>
       )}
-      {err && <div className="glass card" style={{ color: "#fecaca" }}>Something went wrong: {err}</div>}
+      {err && <div className="glass card" style={{ color: "var(--text)", borderColor: "#d1d5db" }}>Something went wrong: {err}</div>}
 
       {r && (
         <>

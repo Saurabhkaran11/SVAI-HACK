@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { UserRound, Settings, Pencil, Check, X } from "lucide-react";
 import { useStore, type Profile } from "../lib/store";
 
-const COLORS = ["#7c8cff", "#c084fc", "#2dd4bf", "#fb7185", "#fbbf24", "#60a5fa"];
 const initials = (n: string) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
 export default function ProfileMenu() {
@@ -35,7 +34,7 @@ export default function ProfileMenu() {
     <div ref={ref} style={{ position: "relative" }}>
       <motion.button className="avatar" style={{ background: profile.color }} onClick={() => setMenu((m) => !m)}
         whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }} aria-label="Profile">
-        {profile.name ? initials(profile.name) : <UserRound size={18} color="#0a0d1f" />}
+        {profile.name ? initials(profile.name) : <UserRound size={18} color="#fff" />}
       </motion.button>
 
       <AnimatePresence>
@@ -44,7 +43,7 @@ export default function ProfileMenu() {
             exit={{ opacity: 0, y: -8, scale: 0.96 }} transition={{ duration: 0.18 }}>
             <div className="row" style={{ padding: "8px 10px 12px" }}>
               <div className="avatar" style={{ background: profile.color, cursor: "default" }}>
-                {profile.name ? initials(profile.name) : <UserRound size={18} color="#0a0d1f" />}
+                {profile.name ? initials(profile.name) : <UserRound size={18} color="#fff" />}
               </div>
               <div>
                 <b>{profile.name || "Guest"}</b>
@@ -77,12 +76,6 @@ export default function ProfileMenu() {
                 <button className="icon-btn" onClick={() => setProfileOpen(false)} aria-label="Close"><X size={16} /></button>
               </div>
               <p className="muted small">Saved as your personal memory in HydraDB, so answers know who you are.</p>
-              <div className="row" style={{ margin: "8px 0" }}>
-                {COLORS.map((c) => (
-                  <span key={c} className={`swatch ${draft.color === c ? "on" : ""}`} style={{ background: c }}
-                    onClick={() => setDraft({ ...draft, color: c })} />
-                ))}
-              </div>
               <label className="label">Name</label>
               <input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Your name" />
               <div className="grid2">

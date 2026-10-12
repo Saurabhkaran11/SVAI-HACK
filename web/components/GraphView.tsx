@@ -12,7 +12,7 @@ export default function GraphView({ paths, height = 380, focus = "" }: { paths: 
     (async () => {
       const [{ Network }, { DataSet }] = await Promise.all([import("vis-network/standalone"), import("vis-data/standalone")]);
       if (cancelled || !ref.current) return;
-      const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#7c8cff";
+      const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
       const nodes = new Map<string, { id: string; label: string; color?: object; font?: object }>();
       const edges: { from: string; to: string; label: string }[] = [];
       const f = focus.trim().toLowerCase();
@@ -26,8 +26,8 @@ export default function GraphView({ paths, height = 380, focus = "" }: { paths: 
             const hit = f && n.toLowerCase().includes(f);
             nodes.set(n, {
               id: n, label: n,
-              color: { background: hit ? accent : "rgba(124,140,255,0.18)", border: accent, highlight: { background: accent, border: "#fff" } },
-              font: { color: hit ? "#0a0d1f" : "#eef1ff", size: 16 },
+              color: { background: hit ? accent : "#ffffff", border: hit ? accent : "#cbd2dc", highlight: { background: "#eff4ff", border: accent }, hover: { background: "#eff4ff", border: accent } },
+              font: { color: hit ? "#ffffff" : "#111827", size: 15 },
             });
           }
         }
@@ -35,7 +35,7 @@ export default function GraphView({ paths, height = 380, focus = "" }: { paths: 
       });
       const n = new Network(ref.current, { nodes: new DataSet([...nodes.values()]), edges: new DataSet(edges as never[]) }, {
         nodes: { shape: "box", margin: { top: 10, bottom: 10, left: 12, right: 12 }, borderWidth: 1.5, shapeProperties: { borderRadius: 10 } },
-        edges: { arrows: "to", color: { color: accent, opacity: 0.8 }, font: { color: "#c7cffd", size: 12, strokeWidth: 0, align: "middle" },
+        edges: { arrows: "to", color: { color: "#9ca3af", highlight: accent, hover: accent }, font: { color: "#6b7280", size: 11, strokeWidth: 3, strokeColor: "#f7f8fa", align: "middle" },
           smooth: { enabled: true, type: "dynamic", roundness: 0.5 }, length: 180 },
         physics: { solver: "forceAtlas2Based", stabilization: { iterations: 220 } },
         interaction: { hover: true, zoomView: true, dragNodes: true },

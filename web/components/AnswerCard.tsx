@@ -24,7 +24,7 @@ export default function AnswerCard({ a, title, win = false, delay = 0 }: { a: An
       </div>
       <div className="row wrap faint small" style={{ margin: "6px 0 10px", gap: 14 }}>
         <span>{a.latency_ms} ms</span><span>{a.chunks.length} sources</span>
-        <motion.span initial={{ scale: 1.4, color: "#fff" }} animate={{ scale: 1, color: "var(--faint)" }} transition={{ delay: delay + 0.3 }}>
+        <motion.span initial={{ scale: 1.4, color: "#111827" }} animate={{ scale: 1, color: "var(--faint)" }} transition={{ delay: delay + 0.3 }}>
           {a.paths.length} relationships
         </motion.span>
       </div>

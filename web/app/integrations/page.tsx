@@ -61,9 +61,9 @@ app.command("/why", async ({ command, ack, respond }) => {
           <h3>Endpoints</h3>
           {ENDPOINTS.map((e, i) => (
             <motion.button key={e.path} className="menu-item" onClick={() => pick(i)} whileHover={{ x: 4 }}
-              style={{ background: i === sel ? "rgba(124,140,255,.16)" : undefined }}>
+              style={{ background: i === sel ? "var(--accent-soft)" : undefined }}>
               <span className="tag" style={{ margin: 0, minWidth: 50, justifyContent: "center",
-                background: e.method === "GET" ? "rgba(52,211,153,.12)" : undefined, color: e.method === "GET" ? "#a7f3d0" : undefined }}>{e.method}</span>
+                background: e.method === "GET" ? "var(--subtle)" : "var(--accent-soft)", color: e.method === "GET" ? "var(--muted)" : "var(--accent)" }}>{e.method}</span>
               <code>{e.path}</code><span className="faint small">{e.desc}</span>
             </motion.button>
           ))}

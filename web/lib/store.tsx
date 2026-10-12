@@ -16,13 +16,13 @@ export type Profile = { name: string; role: string; team: string; about: string;
 const DEFAULT_SETTINGS: Settings = {
   accent: "indigo", reduceMotion: false, compareDefault: true, graphDefault: true, blur: 18, defaultPersona: "engineer",
 };
-const DEFAULT_PROFILE: Profile = { name: "", role: "", team: "", about: "", color: "#7c8cff" };
+const DEFAULT_PROFILE: Profile = { name: "", role: "", team: "", about: "", color: "#2563eb" };
 
 export const ACCENTS: Record<Settings["accent"], [string, string]> = {
-  indigo: ["#7c8cff", "#c084fc"],
-  violet: ["#a78bfa", "#f472b6"],
-  teal: ["#2dd4bf", "#60a5fa"],
-  rose: ["#fb7185", "#fbbf24"],
+  indigo: ["#2563eb", "#2563eb"],
+  violet: ["#2563eb", "#2563eb"],
+  teal: ["#2563eb", "#2563eb"],
+  rose: ["#2563eb", "#2563eb"],
 };
 
 type Ctx = {
@@ -78,7 +78,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const [a, b] = ACCENTS[settings.accent];
     const r = document.documentElement.style;
-    r.setProperty("--accent", a); r.setProperty("--accent2", b); r.setProperty("--blur", `${settings.blur}px`);
+    r.setProperty("--accent", a); r.setProperty("--accent2", b); 
   }, [settings.accent, settings.blur]);
 
   const setSettings = (p: Partial<Settings>) => _setSettings((cur) => { const n = { ...cur, ...p }; save("wb.settings", n); return n; });

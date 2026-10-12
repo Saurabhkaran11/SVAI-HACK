@@ -79,7 +79,7 @@ export default function AskPage() {
         </div>
       </div>
 
-      {err && <div className="glass card" style={{ color: "#fecaca" }}>Something went wrong: {err}</div>}
+      {err && <div className="glass card" style={{ color: "var(--text)", borderColor: "#d1d5db" }}>Something went wrong: {err}</div>}
 
       {busy && (compare
         ? <div className="grid2"><AnswerSkeleton title="Plain search" /><AnswerSkeleton title="WhyBot" /></div>

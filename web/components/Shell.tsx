@@ -10,24 +10,6 @@ import ProfileMenu from "./ProfileMenu";
 import SettingsDrawer from "./SettingsDrawer";
 import FeaturePanel from "./FeaturePanel";
 
-function Backdrop() {
-  const blobs = [
-    { c: "var(--accent)", s: 520, x: ["-10%", "8%", "-10%"], y: ["-15%", "5%", "-15%"], d: 22 },
-    { c: "var(--accent2)", s: 460, x: ["70%", "55%", "70%"], y: ["-10%", "15%", "-10%"], d: 26 },
-    { c: "#22d3ee", s: 380, x: ["35%", "50%", "35%"], y: ["70%", "55%", "70%"], d: 30 },
-  ];
-  return (
-    <div className="backdrop" aria-hidden>
-      {blobs.map((b, i) => (
-        <motion.div key={i} className="blob" style={{ width: b.s, height: b.s, background: b.c }}
-          animate={{ left: b.x, top: b.y, scale: [1, 1.12, 1] }}
-          transition={{ duration: b.d, repeat: Infinity, ease: "easeInOut" }} />
-      ))}
-      <div className="grid-overlay" />
-    </div>
-  );
-}
-
 export default function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const { settings, health, engineDown, setSettingsOpen, toastMsg } = useStore();
@@ -36,14 +18,12 @@ export default function Shell({ children }: { children: ReactNode }) {
 
   return (
     <MotionConfig reducedMotion={settings.reduceMotion ? "always" : "never"}>
-      <Backdrop />
       <div className="shell">
         {/* ---------- top bar ---------- */}
-        <motion.header className="topbar glass" initial={{ y: -30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 120, damping: 18 }}>
+        <header className="topbar glass">
           <Link href="/" className="brand">
-            <motion.span className="brand-mark" whileHover={{ rotate: -8, scale: 1.08 }}><Brain size={20} color="#0a0d1f" /></motion.span>
-            <span className="grad">WhyBot</span>
+            <motion.span className="brand-mark" ><Brain size={18} color="#fff" /></motion.span>
+            <span>WhyBot</span>
           </Link>
           <span className="status">
             <span className={`dot ${health ? (live ? "live" : "off") : engineDown ? "down" : ""}`} />
@@ -54,11 +34,11 @@ export default function Shell({ children }: { children: ReactNode }) {
           </span>
           <div className="spacer" />
           <motion.button className="icon-btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}
-            whileHover={{ rotate: 60 }} whileTap={{ scale: 0.9 }}>
+            >
             <SettingsIcon size={18} />
           </motion.button>
           <ProfileMenu />
-        </motion.header>
+        </header>
 
         <div className="body">
           {/* ---------- left: features ---------- */}
@@ -81,7 +61,7 @@ export default function Shell({ children }: { children: ReactNode }) {
               );
             })}
             <div className="rail-foot glass-soft">
-              Built on <b className="grad">HydraDB</b>
+              Built on <b>HydraDB</b>
               <div className="faint">Company Brain Hackathon</div>
             </div>
           </motion.nav>
@@ -89,9 +69,9 @@ export default function Shell({ children }: { children: ReactNode }) {
           {/* ---------- center: the feature ---------- */}
           <main className="main">
             <AnimatePresence mode="wait">
-              <motion.div key={path} initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}>
+              <motion.div key={path} initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}>
                 {children}
               </motion.div>
             </AnimatePresence>

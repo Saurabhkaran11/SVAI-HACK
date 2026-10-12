@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { X, RotateCcw, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { ACCENTS, useStore, type Settings } from "../lib/store";
+import { useStore } from "../lib/store";
 import { api } from "../lib/api";
 import Toggle from "./Toggle";
 
@@ -29,20 +29,6 @@ export default function SettingsDrawer() {
             </div>
 
             <h3 className="faint" style={{ fontSize: 12, letterSpacing: ".12em", margin: "22px 0 4px" }}>APPEARANCE</h3>
-            <div className="setting">
-              <div><b>Accent</b><span>Colour of highlights and glow</span></div>
-              <div className="row">
-                {(Object.keys(ACCENTS) as Settings["accent"][]).map((a) => (
-                  <motion.span key={a} className={`swatch ${settings.accent === a ? "on" : ""}`} whileHover={{ scale: 1.15 }}
-                    style={{ background: `linear-gradient(135deg, ${ACCENTS[a][0]}, ${ACCENTS[a][1]})` }}
-                    onClick={() => setSettings({ accent: a })} title={a} />
-                ))}
-              </div>
-            </div>
-            <div className="setting">
-              <div><b>Glass blur</b><span>{settings.blur}px</span></div>
-              <input type="range" min={0} max={40} value={settings.blur} onChange={(e) => setSettings({ blur: Number(e.target.value) })} />
-            </div>
             <div className="setting">
               <div><b>Reduce motion</b><span>Turn off animations</span></div>
               <Toggle on={settings.reduceMotion} onChange={(v) => setSettings({ reduceMotion: v })} />

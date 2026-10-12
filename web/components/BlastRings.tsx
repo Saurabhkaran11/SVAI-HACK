@@ -6,7 +6,7 @@ import type { Impact } from "../lib/api";
 export default function BlastRings({ impact }: { impact: Impact }) {
   const size = 520, c = size / 2;
   const radii = [0, 95, 165, 230];
-  const color = impact.risk.level === "High" ? "#f87171" : impact.risk.level === "Medium" ? "#fbbf24" : "#34d399";
+  const color = "#2563eb";
   const byHop = new Map<number, typeof impact.affected>();
   impact.affected.forEach((a) => byHop.set(a.hop, [...(byHop.get(a.hop) ?? []), a]));
   const placed: { name: string; x: number; y: number; hop: number }[] = [];
@@ -22,10 +22,10 @@ export default function BlastRings({ impact }: { impact: Impact }) {
   return (
     <svg viewBox={`0 0 ${size} ${size}`} style={{ width: "100%", maxHeight: 520 }}>
       <defs>
-        <radialGradient id="core"><stop offset="0%" stopColor={color} stopOpacity="0.9" /><stop offset="100%" stopColor={color} stopOpacity="0" /></radialGradient>
+        <radialGradient id="core"><stop offset="0%" stopColor={color} stopOpacity="0.18" /><stop offset="100%" stopColor={color} stopOpacity="0" /></radialGradient>
       </defs>
       {[1, 2, 3].map((h) => (
-        <motion.circle key={h} cx={c} cy={c} r={radii[h]} fill="none" stroke="rgba(255,255,255,.14)" strokeDasharray="4 6"
+        <motion.circle key={h} cx={c} cy={c} r={radii[h]} fill="none" stroke="#d1d5db" strokeDasharray="4 6"
           initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 * h, duration: 0.6 }}
           style={{ transformOrigin: `${c}px ${c}px` }} />
       ))}
@@ -41,16 +41,16 @@ export default function BlastRings({ impact }: { impact: Impact }) {
       <circle cx={c} cy={c} r={70} fill="url(#core)" />
       <motion.circle cx={c} cy={c} r={34} fill={color} initial={{ scale: 0 }} animate={{ scale: [0, 1.2, 1] }}
         transition={{ duration: 0.6 }} style={{ transformOrigin: `${c}px ${c}px` }} />
-      <text x={c} y={c + 58} textAnchor="middle" fill="#eef1ff" fontSize="14" fontWeight="700">{centre.slice(0, 32)}</text>
+      <text x={c} y={c + 58} textAnchor="middle" fill="#111827" fontSize="14" fontWeight="700">{centre.slice(0, 32)}</text>
       {placed.map((p, i) => (
         <motion.g key={p.name} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 + i * 0.1, type: "spring", stiffness: 200, damping: 14 }} style={{ transformOrigin: `${p.x}px ${p.y}px` }}>
           <circle cx={p.x} cy={p.y} r={p.hop === 1 ? 11 : 8} fill={color} fillOpacity={p.hop === 1 ? 0.95 : 0.6} stroke="#fff" strokeOpacity={0.6} />
-          <text x={p.x} y={p.y - 16} textAnchor="middle" fill="#eef1ff" fontSize="12.5">{p.name}</text>
+          <text x={p.x} y={p.y - 16} textAnchor="middle" fill="#374151" fontSize="12.5">{p.name}</text>
         </motion.g>
       ))}
       {[1, 2, 3].map((h) => (
-        <text key={`t${h}`} x={c + radii[h] - 4} y={c - 6} textAnchor="end" fill="rgba(255,255,255,.35)" fontSize="10">hop {h}</text>
+        <text key={`t${h}`} x={c + radii[h] - 4} y={c - 6} textAnchor="end" fill="#9ca3af" fontSize="10">hop {h}</text>
       ))}
     </svg>
   );
