@@ -102,6 +102,21 @@ def extractive(context: str) -> str:
     return "\n".join(out)
 
 
+def passages(chunks, limit: int = 4) -> str:
+    """Plain search view: the top matching passages as-is — no graph, no AI writing."""
+    seen, out = set(), ["**Top matching passages**"]
+    for c in chunks:
+        title = (c.title or "source").strip()
+        text = " ".join((c.content or "").split())
+        if not text or (title, text[:80]) in seen:
+            continue
+        seen.add((title, text[:80]))
+        out.append(f"- **{title}** — {text[:260]}{'…' if len(text) > 260 else ''}")
+        if len(out) > limit:
+            break
+    return "\n".join(out) if len(out) > 1 else EMPTY
+
+
 def complete(system: str, user: str) -> str | None:
     try:
         if settings.anthropic_key:

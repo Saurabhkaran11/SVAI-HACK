@@ -51,7 +51,8 @@ def test_compare_spends_one_llm_call(sample, monkeypatch):
     r = sample.post("/compare", json={"question": "What would break if we deprecated the v1 payments API?"}).json()
     assert len(calls) == 1
     assert r["with_graph"]["answer"] == "Graph answer [ADR-007]"
-    assert "Here's what your brain found" in r["without_graph"]["answer"]
+    plain = r["without_graph"]["answer"]
+    assert plain.startswith("**Top matching passages**") and "Add a free LLM" not in plain
 
 
 def test_context_is_capped_for_token_limits(sample, monkeypatch):
@@ -70,3 +71,11 @@ def test_openai_client_does_not_retry(monkeypatch):
         assert llm._openai().max_retries == 0
     finally:
         llm._openai.cache_clear()
+
+
+def test_passages_view_dedupes_and_truncates():
+    from whybot.models import Chunk
+    cs = [Chunk("ADR-007", "x " * 400, 0.9), Chunk("ADR-007", "x " * 400, 0.8), Chunk("", "short note", 0.5)]
+    out = llm.passages(cs)
+    assert out.count("**ADR-007**") == 1 and "…" in out and "**source** — short note" in out
+    assert llm.passages([]) == llm.EMPTY

@@ -31,7 +31,7 @@ def _compute(question: str, persona: str | None, graph: bool, write: bool = True
     memories = state.memories(persona)
     r = retrieve(question, persona, graph)
     # write=False: show what retrieval alone returns (used for the "plain search" side of compare).
-    text = llm.generate(llm.ANSWER_SYSTEM, question, r.context, memories) if write else llm.extractive(r.context)
+    text = llm.generate(llm.ANSWER_SYSTEM, question, r.context, memories) if write else (llm.passages(r.chunks) if r.chunks else llm.extractive(r.context))
     return Answer(text, r.chunks, r.paths, memories, r.mode, int((time.perf_counter() - t0) * 1000),
                   _features(graph, persona, r.paths))
 
