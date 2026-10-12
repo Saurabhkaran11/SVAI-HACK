@@ -1,0 +1,12 @@
+hydradb-sdk>=2.1.1,<3
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+pypdf
+anthropic
+openai
+pytest
+httpx
+hypothesis
+pytest-timeout

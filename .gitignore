@@ -1,0 +1,19 @@
+# secrets
+.env
+backend/.env
+*.env.local
+# local environments & builds
+.venv/
+web/node_modules/
+web/.next/
+web/next-env.d.ts
+web/tsconfig.tsbuildinfo
+__pycache__/
+.pytest_cache/
+.hypothesis/
+# runtime data & logs
+.logs/
+backend/brain_state.json
+backend/.state-*
+tests_e2e/screenshots/
+.DS_Store
