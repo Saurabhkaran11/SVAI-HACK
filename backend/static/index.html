@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WhyBot · Your Company Brain</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/standalone/umd/vis-network.min.js"></script>
+<style>
+:root{--bg:#0b1020;--panel:#121a33;--panel2:#18223f;--line:#26315a;--text:#e7ebff;--muted:#97a0c7;
+--accent:#7c8cff;--accent2:#c084fc;--good:#34d399;--warn:#fbbf24;--bad:#f87171;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:
+radial-gradient(1200px 600px at 10% -10%,#1b2450 0,transparent 60%),radial-gradient(900px 500px at 110% 10%,#2a1846 0,transparent 55%),var(--bg);
+color:var(--text);min-height:100vh}
+a{color:var(--accent)}
+header{display:flex;align-items:center;gap:14px;padding:16px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;
+background:rgba(11,16,32,.85);backdrop-filter:blur(8px);z-index:5}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.3px}
+.logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
+.pill{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.live{color:var(--good);border-color:#1f6f55}
+.grow{flex:1}
+nav button{background:none;border:none;color:var(--muted);font:inherit;padding:8px 12px;border-radius:10px;cursor:pointer}
+nav button.on{color:var(--text);background:var(--panel2)}
+.wrap{display:grid;grid-template-columns:320px 1fr;gap:20px;padding:20px 24px;max-width:1500px;margin:0 auto}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.side .card{margin-bottom:14px}
+input,textarea,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;
+padding:10px 12px;font:inherit;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+button.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#0b1020;font-weight:700;
+padding:10px 14px;border-radius:10px;cursor:pointer;font:inherit;font-weight:700}
+button.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;font:inherit}
+button:disabled{opacity:.5;cursor:wait}
+.row{display:flex;gap:8px;align-items:center}
+.stack>*+*{margin-top:8px}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--accent);color:var(--text)}
+.hero{padding:22px;border-radius:var(--r);background:linear-gradient(120deg,#1a2350,#2b1b4a);border:1px solid var(--line);margin-bottom:16px}
+.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:-.4px}
+.hero p{margin:0;color:var(--muted)}
+.ask{display:flex;gap:10px;margin:14px 0}
+.ask input{font-size:16px;padding:14px 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:6px 12px;border-radius:999px;cursor:pointer;font-size:13px}
+.chip:hover{border-color:var(--accent)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.cols.single{grid-template-columns:1fr}
+@media(max-width:1100px){.cols{grid-template-columns:1fr}}
+.ans h2{margin:0 0 4px;font-size:16px}
+.meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.md{line-height:1.55}
+.md p{margin:.4em 0}.md ul{padding-left:1.2em;margin:.4em 0}
+.ans.win{border-color:#4b4fa8;box-shadow:0 0 0 1px #4b4fa8,0 10px 40px -10px #4b4fa880}
+.graph{height:380px;background:#0e1530;border:1px solid var(--line);border-radius:12px;margin-top:12px}
+details{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+summary{cursor:pointer;color:var(--muted);font-size:13px}
+.feat{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;background:#3a2c0b;color:var(--warn);margin:3px 4px 0 0}
+.path{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#1d2654;color:#c7cffd;padding:3px 8px;border-radius:6px;margin:3px 4px 0 0}
+.src{border-top:1px solid var(--line);padding:8px 0;font-size:13px}
+.src b{color:var(--text)}.src pre{white-space:pre-wrap;color:var(--muted);margin:4px 0 0;font-family:inherit}
+.empty{color:var(--muted);text-align:center;padding:40px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{font-size:26px;display:block}.stat span{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+.st{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--panel2)}
+.st.completed{color:var(--good)}.st.processing,.st.queued,.st.graph_creation{color:var(--warn)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--line);padding:12px 16px;border-radius:12px;
+opacity:0;transform:translateY(10px);transition:.25s;z-index:20}
+.toast.show{opacity:1;transform:none}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-top-color:transparent;border-radius:50%;animation:s 1s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+.sponsor{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.sponsor{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+.sponsor .card h2{margin:0 0 8px}
+.sponsor li{margin:6px 0;color:var(--muted)}.sponsor li b{color:var(--text)}
+.hidden{display:none}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer}
+.toggle input{width:auto}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🧠 <span>WhyBot</span></div>
+  <span id="mode" class="pill">connecting…</span>
+  <div class="grow"></div>
+  <nav>
+    <button data-view="ask" class="on">Ask</button>
+    <button data-view="brain">Brain</button>
+    <button data-view="built">Built with</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="card stack">
+      <h3>1 · Feed your brain</h3>
+      <label class="drop" id="drop">
+        <input type="file" id="file" multiple accept=".pdf,.md,.txt,.csv,.json" hidden>
+        <div>📄 Drop PDFs, notes, Slack/Jira exports<br><small>or click to browse</small></div>
+      </label>
+      <div class="row">
+        <input id="url" placeholder="https://docs.hydradb.com/">
+        <button class="ghost" id="addUrl">Add</button>
+      </div>
+      <button class="ghost" id="sample" style="width:100%">No docs handy? Load starter data</button>
+    </div>
+
+    <div class="card stack">
+      <h3>2 · Who's asking?</h3>
+      <select id="persona"></select>
+      <details><summary>➕ Create a persona</summary>
+        <div class="stack" style="margin-top:8px">
+          <input id="pLabel" placeholder="Support Lead, Investor, Me…">
+          <textarea id="pMem" rows="3" placeholder="What should the brain know about them? One per line."></textarea>
+          <button class="ghost" id="pCreate">Create</button>
+        </div>
+      </details>
+      <details><summary>💾 Remember something about me</summary>
+        <div class="stack" style="margin-top:8px">
+          <input id="mem" placeholder="I own the mobile release">
+          <button class="ghost" id="memSave">Remember</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="card stack">
+      <h3>3 · Retrieval</h3>
+      <label class="toggle"><input type="checkbox" id="compare" checked> Compare plain search vs WhyBot</label>
+      <label class="toggle"><input type="checkbox" id="graph" checked> Graph context</label>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+    <section id="view-ask">
+      <div class="hero">
+        <h1>Ask across everything your team knows.</h1>
+        <p>WhyBot links docs, chats and tickets into a knowledge graph — answers come with <b>who owns it</b>,
+          <b>what depends on it</b>, and sources, tailored to who's asking.</p>
+      </div>
+      <div class="ask">
+        <input id="q" placeholder="What would break if we changed X? Who owns Y? Why did we decide Z?" autocomplete="off">
+        <button class="btn" id="go">Ask</button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div id="results"><div class="empty" id="emptyMsg"></div></div>
+    </section>
+
+    <section id="view-brain" class="hidden">
+      <div class="stats">
+        <div class="stat"><b id="sDocs">0</b><span>Documents</span></div>
+        <div class="stat"><b id="sPersonas">0</b><span>Personas</span></div>
+        <div class="stat"><b id="sMem">0</b><span>Memories</span></div>
+        <div class="stat"><b id="sAsked">0</b><span>Questions answered</span></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <h3 style="margin:0">What's in the brain</h3>
+          <button class="ghost" id="refresh">Refresh status</button>
+        </div>
+        <table><thead><tr><th>Title</th><th>Type</th><th>Indexing</th></tr></thead><tbody id="inv"></tbody></table>
+      </div>
+    </section>
+
+    <section id="view-built" class="hidden">
+      <div class="sponsor">
+        <div class="card">
+          <h2>⚡ HydraDB</h2>
+          <p style="color:var(--muted)">The memory layer behind every answer. Open <b>Under the hood</b> on any answer to see which features fired.</p>
+          <ul>
+            <li><b>Hybrid search</b> — semantic + keyword in one call</li>
+            <li><b>Context graphs</b> — multi-hop paths across people, services, decisions</li>
+            <li><b>Bring-your-own-graph</b> — exact edges for org charts & service catalogs</li>
+            <li><b>Memories</b> — per-persona collections merged via <code>type="all"</code></li>
+            <li><b>Thinking mode</b> — query expansion for deeper traversal</li>
+          </ul>
+          <p><b>Try it on HydraDB itself:</b> add <code>https://docs.hydradb.com/</code> and ask
+            “How are memories different from knowledge?”</p>
+          <div class="row"><a href="https://app.hydradb.com/sign-up" target="_blank">Get a key →</a>
+            <a href="https://docs.hydradb.com/" target="_blank">Docs →</a></div>
+        </div>
+        <div class="card">
+          <h2>🧱 App-Starter</h2>
+          <p style="color:var(--muted)">WhyBot exposes a clean REST API, ready to drop into an App-Starter SaaS shell for auth, billing and team workspaces.</p>
+          <ul>
+            <li><code>POST /ask</code> · <code>/compare</code></li>
+            <li><code>POST /upload</code> · <code>/url</code></li>
+            <li><code>POST /memory</code> · <code>/persona</code></li>
+            <li><a href="/docs" target="_blank">Interactive API docs →</a></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>👥 Who it's for</h2>
+          <ul>
+            <li><b>New hires</b> — who owns what, who to ask</li>
+            <li><b>Engineers</b> — what breaks if I change this?</li>
+            <li><b>Managers</b> — what's blocking us, and who's on it?</li>
+            <li><b>Support</b> — answers from tickets + runbooks</li>
+            <li><b>Anyone</b> — a personal brain from notes & PDFs</li>
+          </ul>
+          <p style="color:var(--muted)">Built at the Company Brain Hackathon · hosted by Digo.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error((await r.text()).slice(0, 200));
+  return r.json();
+};
+const post = (path, body) => api(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const md = s => window.marked ? marked.parse(String(s || "")) : `<pre>${esc(s)}</pre>`;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600)}
+let asked = 0, state = {docs: 0, sample: false, starter: [], sampleQs: []};
+
+// ---------- navigation
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["ask","brain","built"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== b.dataset.view));
+  if (b.dataset.view === "brain") loadInventory();
+});
+
+// ---------- bootstrap
+async function boot(){
+  try {
+    const h = await api("/health");
+    $("#mode").textContent = h.mode === "hydradb" ? "⚡ HydraDB live" : "Offline mode";
+    $("#mode").classList.toggle("live", h.mode === "hydradb");
+    state = {...state, docs: h.docs, sample: h.sample_loaded, starter: h.starter_questions, sampleQs: h.sample_questions};
+  } catch(e){ $("#mode").textContent = "API offline"; }
+  await loadPersonas(); renderChips(); renderEmpty();
+}
+async function loadPersonas(sel){
+  const ps = await api("/personas");
+  $("#persona").innerHTML = Object.entries(ps).map(([k,v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+  if (sel) $("#persona").value = sel;
+  $("#sPersonas").textContent = Object.keys(ps).length;
+}
+function renderChips(){
+  const qs = state.sample ? state.sampleQs : state.starter;
+  $("#chips").innerHTML = qs.map(q => `<button class="chip">${esc(q)}</button>`).join("");
+  $("#chips").querySelectorAll(".chip").forEach(c => c.onclick = () => { $("#q").value = c.textContent; ask(); });
+}
+function renderEmpty(){
+  $("#sample").classList.toggle("hidden", !!state.sample);
+  const e = $("#emptyMsg"); if (!e) return;
+  e.innerHTML = state.docs ? `Your brain has <b>${state.docs}</b> document(s). Ask anything above.`
+    : `Your brain is empty. Drop files or add a docs URL on the left — try <b>https://docs.hydradb.com/</b> — or load the starter data.`;
+}
+
+// ---------- ingestion
+async function afterIngest(msg){ toast(msg); const h = await api("/health"); state.docs = h.docs; state.sample = h.sample_loaded; renderChips(); renderEmpty(); }
+async function uploadFiles(files){
+  for (const f of files){
+    const fd = new FormData(); fd.append("file", f);
+    toast(`Adding ${f.name}…`);
+    try { await api("/upload", {method:"POST", body: fd}); await afterIngest(`Added ${f.name}`); }
+    catch(e){ toast(`${f.name}: ${e.message}`); }
+  }
+}
+const drop = $("#drop");
+$("#file").onchange = e => uploadFiles(e.target.files);
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => {e.preventDefault(); drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => {e.preventDefault(); drop.classList.remove("over")}));
+drop.addEventListener("drop", e => uploadFiles(e.dataTransfer.files));
+$("#addUrl").onclick = async () => {
+  const u = $("#url").value.trim(); if (!u) return;
+  $("#addUrl").disabled = true; toast("Fetching page…");
+  try { await post("/url", {url: u}); $("#url").value = ""; await afterIngest("Page added to your brain"); }
+  catch(e){ toast("Couldn't fetch: " + e.message); }
+  $("#addUrl").disabled = false;
+};
+$("#sample").onclick = async () => { $("#sample").disabled = true; await post("/sample", {}); await afterIngest("Starter data loaded"); };
+
+// ---------- personas & memory
+$("#pCreate").onclick = async () => {
+  const label = $("#pLabel").value.trim(); if (!label) return;
+  const r = await post("/persona", {label, memories: $("#pMem").value.split("\n")});
+  $("#pLabel").value = $("#pMem").value = ""; await loadPersonas(r.key); toast(`Persona “${label}” created`);
+};
+$("#memSave").onclick = async () => {
+  const text = $("#mem").value.trim(); if (!text) return;
+  await post("/memory", {persona: $("#persona").value, text}); $("#mem").value = ""; toast("Saved to memory");
+};
+
+// ---------- asking
+$("#go").onclick = ask;
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
+$("#compare").onchange = () => $("#graph").disabled = $("#compare").checked;
+$("#graph").disabled = true;
+
+async function ask(){
+  const question = $("#q").value.trim(); if (!question) return;
+  const persona = $("#persona").value, compare = $("#compare").checked;
+  $("#go").disabled = true;
+  $("#results").innerHTML = `<div class="empty"><span class="spin"></span> Connecting the dots…</div>`;
+  try {
+    if (compare){
+      const r = await post("/compare", {question, persona});
+      $("#results").innerHTML = `<div class="cols">${card(r.without_graph,"Plain search","a")}${card(r.with_graph,"WhyBot · graph + memory","b",true)}</div>`;
+      draw("a", r.without_graph.paths); draw("b", r.with_graph.paths);
+    } else {
+      const r = await post("/ask", {question, persona, graph: $("#graph").checked});
+      $("#results").innerHTML = `<div class="cols single">${card(r,"Answer","a",true)}</div>`;
+      draw("a", r.paths);
+    }
+    $("#sAsked").textContent = ++asked;
+  } catch(e){ $("#results").innerHTML = `<div class="empty">Something went wrong: ${esc(e.message)}</div>`; }
+  $("#go").disabled = false;
+}
+
+function card(a, title, id, win){
+  return `<div class="card ans ${win ? "win" : ""}">
+    <h2>${esc(title)}</h2>
+    <div class="meta">${a.latency_ms} ms · ${a.chunks.length} sources · ${a.paths.length} relationships</div>
+    <div class="md">${md(a.answer)}</div>
+    ${a.paths.length ? `<div class="graph" id="g-${id}"></div>` : ""}
+    <details><summary>⚡ Under the hood (HydraDB)</summary>
+      <div>${a.features.map(f => `<span class="feat">${esc(f)}</span>`).join("")}</div>
+      <div style="margin-top:6px">${a.paths.slice(0,15).map(p => `<span class="path">${esc(p)}</span>`).join("")}</div>
+      <div class="meta" style="margin-top:6px">engine: ${esc(a.mode)}</div>
+    </details>
+    <details><summary>📄 Sources (${a.chunks.length})</summary>
+      ${a.chunks.map(c => `<div class="src"><b>${esc(c.title)}</b> · score ${c.score ?? "n/a"}<pre>${esc(String(c.content).slice(0,400))}</pre></div>`).join("") || "<div class='meta'>none</div>"}
+    </details>
+    ${a.memories.length ? `<details><summary>🧑 Memory used for this persona</summary><ul>${a.memories.map(m => `<li>${esc(m)}</li>`).join("")}</ul></details>` : ""}
+  </div>`;
+}
+
+function draw(id, paths){
+  const el = document.getElementById("g-" + id); if (!el || !paths.length) return;
+  if (!window.vis){ el.innerHTML = `<div class="meta" style="padding:12px">${paths.map(p => `<span class="path">${esc(p)}</span>`).join("")}</div>`; el.style.height = "auto"; return; }
+  const nodes = new Map(), edges = [];
+  paths.slice(0, 30).forEach(p => {
+    const m = p.match(/^(.+?) --\[(.+?)\]--> (.+)$/); if (!m) return;
+    [m[1], m[3]].forEach(n => nodes.has(n) || nodes.set(n, {id: n, label: n}));
+    edges.push({from: m[1], to: m[3], label: m[2]});
+  });
+  const net = new vis.Network(el, {nodes: [...nodes.values()], edges}, {
+    nodes: {shape: "box", color: {background: "#1d2654", border: "#7c8cff"}, font: {color: "#e7ebff", size: 18}, margin: 10},
+    edges: {arrows: "to", color: "#7c8cff", font: {color: "#c7cffd", size: 13, strokeWidth: 0, align: "middle"}, smooth: {type: "dynamic"}, length: 170},
+    physics: {solver: "forceAtlas2Based", stabilization: {iterations: 200}}, interaction: {zoomView: true, dragNodes: true}
+  });
+  net.once("stabilizationIterationsDone", () => { net.setOptions({physics: false}); net.fit(); });
+}
+
+// ---------- inventory
+async function loadInventory(){
+  const rows = await api("/inventory");
+  $("#sDocs").textContent = rows.length;
+  const ps = await api("/personas/full");
+  $("#sMem").textContent = Object.values(ps).reduce((n, p) => n + p.memories.length, 0);
+  $("#inv").innerHTML = rows.length ? rows.map(r => `<tr><td>${esc(r.title)}</td><td>${esc(r.type)}</td>
+    <td><span class="st ${esc(r.status || "")}">${esc(r.status || "local")}</span></td></tr>`).join("")
+    : `<tr><td colspan="3" class="meta">Nothing yet — feed your brain from the left.</td></tr>`;
+}
+$("#refresh").onclick = loadInventory;
+boot();
+</script>
+</body>
+</html>
