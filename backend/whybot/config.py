@@ -40,6 +40,12 @@ class Settings:
     fetch_timeout_s: float = float(os.getenv("FETCH_TIMEOUT_S", "20"))
     cache_ttl_s: int = int(os.getenv("CACHE_TTL_S", "600"))
     max_hops: int = int(os.getenv("MAX_HOPS", "3"))
+    # Public deployment guardrails (see whybot/api/guard.py)
+    public_mode: bool = _bool("PUBLIC_MODE")
+    admin_token: str = os.getenv("ADMIN_TOKEN", "")
+    rate_ai_per_min: int = int(os.getenv("RATE_AI_PER_MIN", "12"))
+    rate_ingest_per_hour: int = int(os.getenv("RATE_INGEST_PER_HOUR", "20"))
+    auto_sample: bool = _bool("AUTO_SAMPLE")
     cors_origins: tuple[str, ...] = tuple(os.getenv("CORS_ORIGINS", "*").split(","))
 
     @property

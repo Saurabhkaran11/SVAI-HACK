@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,7 +16,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from .. import __version__
 from ..config import settings
 from ..hydra import UpstreamError
-from ..services import personas
+from ..services import knowledge, personas
+from ..state import state
+from .guard import public_guard
 from .routes import ROUTERS
 
 log = logging.getLogger("whybot")
@@ -29,6 +32,14 @@ async def lifespan(app: FastAPI):
         personas.sync_all()
     except Exception as e:
         log.warning("persona sync skipped: %s", e)
+    if settings.auto_sample and not state.docs:  # fresh container (no disk): reload the starter brain
+        def _load():
+            try:
+                knowledge.load_sample()
+                log.info("starter data loaded")
+            except Exception as e:
+                log.warning("starter data skipped: %s", e)
+        threading.Thread(target=_load, name="whybot-autosample", daemon=True).start()
     yield
 
 
@@ -40,6 +51,7 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["*"], allow_headers=["*"])
     app.add_middleware(GZipMiddleware, minimum_size=1024)
+    app.middleware("http")(public_guard)
 
     @app.middleware("http")
     async def timing(request: Request, call_next):

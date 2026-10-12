@@ -1,0 +1,33 @@
+# One-click deploy on Render: Dashboard → New → Blueprint → pick this repo.
+# You'll be asked for the two secret keys; everything else is preset.
+services:
+  - type: web
+    name: whybot
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: HYDRA_DB_API_KEY        # from hydradb.com dashboard
+        sync: false
+      - key: OPENAI_API_KEY          # your Groq key (gsk_...) from console.groq.com
+        sync: false
+      - key: OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: OPENAI_MODEL
+        value: openai/gpt-oss-120b
+      - key: HYDRA_DATABASE          # separate from your local demo brain
+        value: whybotpublic
+      - key: PUBLIC_MODE
+        value: "1"
+      - key: AUTO_SAMPLE
+        value: "1"
+      - key: RATE_AI_PER_MIN
+        value: "12"
+      - key: RATE_INGEST_PER_HOUR
+        value: "20"
+      - key: MAX_UPLOAD_MB
+        value: "10"
+      - key: ADMIN_TOKEN             # lets you (only) reset the public brain
+        generateValue: true

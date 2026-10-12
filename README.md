@@ -44,8 +44,9 @@ No wifi on stage? Set `MOCK_MODE=1` in `backend/.env` and restart.
 Run the tests: `cd backend && pytest -q` (248 tests, offline, ~13s). Full report and browser tests: see **TESTING.md**.
 
 ## Deploy (free tiers)
-- Engine → [Render](https://render.com): root directory `backend`, start command `uvicorn main:app --host 0.0.0.0 --port $PORT`, add `.env` values.
-- Web → [Vercel](https://vercel.com): root directory `web`, env `BACKEND_URL=https://<your-render-url>`.
+- **One click on Render:** New → Blueprint → this repo (uses `render.yaml` + `Dockerfile`), then paste your HydraDB and Groq keys.
+- **Optional Vercel front end:** root directory `web`, env `BACKEND_URL=https://<your-render-url>/api`.
+- Public-mode guardrails (per-visitor rate limits, admin-only reset) are on by default. Full guide: [DEPLOY.md](DEPLOY.md).
 
 ## Architecture
 ```
