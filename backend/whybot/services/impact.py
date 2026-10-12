@@ -33,6 +33,17 @@ def _people(chunks) -> list[str]:
     return sorted(found)[:8]
 
 
+_LEVEL_WORD = re.compile(r"\b(Low|Medium|High)(?=[\s\-\u2010\u2011\u2013]*risk)", re.I)
+
+
+def align_verdict(brief: str, level: str) -> str:
+    """The score is computed, not guessed: make the brief's verdict say the same level the gauge shows."""
+    head, sep, rest = brief.partition("\n\n")
+    if "verdict" not in head.lower() and head.strip():
+        head, sep, rest = brief[:300], "", brief[300:]
+    return _LEVEL_WORD.sub(level, head) + sep + rest
+
+
 def _compute(change: str, persona: str | None) -> dict:
     t0 = time.perf_counter()
     # Retrieve on the change itself: wrapper words ("depends", "owned") would match unrelated docs.
@@ -54,6 +65,7 @@ def _compute(change: str, persona: str | None) -> dict:
              + "\nOwners: " + "; ".join(f"{o}: {', '.join(v)}" for o, v in owners.items())
              + "\nPast incidents: " + ", ".join(incidents) + f"\nComputed risk: {risk['level']} ({risk['score']}/100)")
     brief = llm.generate(llm.IMPACT_SYSTEM, f"Planned change: {change}", r.context + facts, state.memories(persona))
+    brief = align_verdict(brief, risk["level"])
 
     phrase = change.strip().rstrip(".")
     phrase = phrase[:1].lower() + phrase[1:]

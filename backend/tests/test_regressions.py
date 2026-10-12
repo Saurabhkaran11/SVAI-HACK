@@ -266,3 +266,12 @@ def test_odd_model_citations_removed(sample, monkeypatch):
     monkeypatch.setattr(llm, "complete", lambda s, u: "- billing breaks【1†L13-L15】【4†L2-L3】 [ADR-007]")
     a = sample.post("/ask", json={"question": "citation cleanup billing-service"}).json()["answer"]
     assert a == "- billing breaks [ADR-007]"
+
+
+def test_impact_verdict_matches_computed_risk():
+    from whybot.services.impact import align_verdict
+    b = "**Verdict**\n⚠️ **Medium\u2011risk** – deprecation touches billing\n\n**What breaks**\n- low-risk path stays"
+    out = align_verdict(b, "High")
+    assert "High\u2011risk" in out and "Medium" not in out.split("\n\n")[0]
+    assert "low-risk path stays" in out  # only the verdict is touched
+    assert align_verdict("**Verdict:** Low risk overall.", "Medium") == "**Verdict:** Medium risk overall."

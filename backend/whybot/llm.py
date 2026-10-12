@@ -18,7 +18,7 @@ ANSWER_SYSTEM = (
 )
 IMPACT_SYSTEM = (
     "You are WhyBot's change-impact analyst. Using ONLY the context, write a crisp markdown brief: "
-    "**Verdict** (one line with the risk level), **What breaks** (bullets, cite sources in [brackets]), "
+    "**Verdict** (one line that uses EXACTLY the computed risk level and score given in the context), **What breaks** (bullets, cite sources in [brackets]), "
     "**Who to notify**, **Lessons from past incidents**, **Safe rollout checklist** (3-5 steps). Max ~220 words."
 )
 _ODD_CITES = re.compile(r"【[^】]{0,40}】")  # e.g. 【1†L13-L15】 from some open models
