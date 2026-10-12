@@ -27,4 +27,11 @@ Vector search returns a reading list. A graph returns a map, and a map is what y
 ## What's next
 Run Blast Radius automatically on every pull request and change ticket; Slack, Jira and Notion live connectors; App-Starter billing and workspaces.
 
-**Built with:** hydradb, claude, nextjs, fastapi, python, typescript, motion
+**Built with:** hydradb, groq, nextjs, fastapi, python, typescript, motion
+
+## Try it
+- **Code:** https://github.com/Saurabhkaran11/SVAI-HACK
+- **Run locally (macOS):** right-click `WhyBot.command` → Open. First run installs everything, then opens http://localhost:3000
+- **Keys:** `backend/.env` — HydraDB key + any OpenAI-compatible LLM (we used Groq `openai/gpt-oss-120b`); works offline with `MOCK_MODE=1`
+- **Verified live:** Blast Radius on "Deprecate payments-api-v1" → High risk, 6 systems, 3 teams, past incident found, in ~4 s on HydraDB + Groq
+- **Quality:** 252 backend tests (edge cases, fuzzing, fault injection) + browser regression suite — see TESTING.md
