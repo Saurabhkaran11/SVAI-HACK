@@ -82,7 +82,10 @@ def blast_radius(change: str, persona: str | None = None) -> dict:
     if not change:
         raise ValueError("Describe the change you're planning.")
     t0 = time.perf_counter()
-    result, hit = answers.get_or_set(("impact", change.lower(), persona, state.version), lambda: _compute(change, persona))
+    key = ("impact", change.lower(), persona, state.version)
+    result, hit = answers.get_or_set(key, lambda: _compute(change, persona))
+    if not hit and llm.BUSY in result["brief"]:  # never cache a degraded brief
+        answers.drop(key)
     out = {k: v for k, v in result.items() if not k.startswith("_")}
     if hit:
         out["latency_ms"] = int((time.perf_counter() - t0) * 1000)

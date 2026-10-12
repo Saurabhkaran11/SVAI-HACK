@@ -36,6 +36,10 @@ class TTLCache:
                 self._data.popitem(last=False)
         return value, False
 
+    def drop(self, key: tuple) -> None:
+        with self._lock:
+            self._data.pop(key, None)
+
     def clear(self) -> None:
         with self._lock:
             self._data.clear()

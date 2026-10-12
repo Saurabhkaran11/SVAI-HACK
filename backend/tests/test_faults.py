@@ -178,7 +178,7 @@ def test_llm_exception_degrades_gracefully(sample, monkeypatch):
     monkeypatch.setattr(llm, "_anthropic", lambda: Boom)
     monkeypatch.setattr("whybot.llm.settings", config_mod.Settings(**{**config_mod.settings.__dict__, "anthropic_key": "k"}))
     r = sample.post("/ask", json={"question": "llm failure billing-service"})
-    assert r.status_code == 200 and "LLM unavailable" in r.json()["answer"] and "what your brain found" in r.json()["answer"]
+    assert r.status_code == 200 and llm.BUSY in r.json()["answer"] and "what your brain found" in r.json()["answer"]
 
 
 def test_llm_empty_or_none_output(sample, monkeypatch):

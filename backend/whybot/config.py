@@ -30,7 +30,9 @@ class Settings:
     # Any OpenAI-compatible endpoint: Groq, Google Gemini, Ollama/LM Studio (local, no key), OpenRouter…
     openai_base_url: str = os.getenv("OPENAI_BASE_URL", "")
     llm_max_tokens: int = int(os.getenv("LLM_MAX_TOKENS", "700"))
-    llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "45"))
+    llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "20"))
+    # Free LLM tiers are rate-limited by tokens/minute: cap the context we send per answer.
+    llm_context_chars: int = int(os.getenv("LLM_CONTEXT_CHARS", "6000"))
 
     state_file: Path = Path(os.getenv("STATE_FILE", str(BACKEND_DIR / "brain_state.json")))
     max_upload_mb: int = int(os.getenv("MAX_UPLOAD_MB", "20"))

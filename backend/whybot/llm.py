@@ -22,6 +22,7 @@ IMPACT_SYSTEM = (
     "**Who to notify**, **Lessons from past incidents**, **Safe rollout checklist** (3-5 steps). Max ~220 words."
 )
 _ODD_CITES = re.compile(r"【[^】]{0,40}】")  # e.g. 【1†L13-L15】 from some open models
+BUSY = "_The AI writer is busy right now (rate limit or timeout), so this is the evidence summary. Ask again in a minute for a written answer._"
 EMPTY = "I don't have anything on that yet. Add docs, notes or a URL to your brain and ask again."
 
 
@@ -38,7 +39,7 @@ def _openai():
 
     # Local servers (Ollama, LM Studio) accept any key; the SDK just needs a non-empty string.
     return OpenAI(api_key=settings.openai_key or "not-needed", base_url=settings.openai_base_url or None,
-                  timeout=settings.llm_timeout_s)
+                  timeout=settings.llm_timeout_s, max_retries=0)  # fail fast; we fall back to the evidence summary
 
 
 def _openai_enabled() -> bool:
@@ -55,6 +56,9 @@ def provider() -> str:
         if name in url:
             return {"generativelanguage": "gemini", "11434": "ollama", "1234": "lm-studio"}.get(name, name)
     return "openai-compatible" if url else "openai"
+
+
+_NO_LLM_NOTE = "\n_Evidence summary. Add a free LLM (see backend/.env) for a written, cited answer._"
 
 
 def extractive(context: str) -> str:
@@ -94,7 +98,7 @@ def extractive(context: str) -> str:
     if relations:
         out.append("\n**How it's connected**")
         out += [f"- {r.replace('--[', '→ ').replace(']-->', ' →')}" for r in relations[:6]]
-    out.append("\n_Evidence summary. Add a free LLM (see backend/.env) for a written, cited answer._")
+    out.append(_NO_LLM_NOTE)
     return "\n".join(out)
 
 
@@ -105,9 +109,12 @@ def complete(system: str, user: str) -> str | None:
                                                system=system, messages=[{"role": "user", "content": user}])
             return "".join(getattr(b, "text", "") for b in msg.content).strip()
         if _openai_enabled():
+            extra: dict = {}
+            if "gpt-oss" in settings.openai_model:  # reasoning model: keep thinking short so it stays fast and cheap
+                extra = {"extra_body": {"reasoning_effort": "low", "max_completion_tokens": settings.llm_max_tokens * 2}}
             r = _openai().chat.completions.create(model=settings.openai_model,
                                                   messages=[{"role": "system", "content": system},
-                                                            {"role": "user", "content": user}])
+                                                            {"role": "user", "content": user}], **extra)
             return (r.choices[0].message.content or "").strip()
     except Exception as e:
         log.warning("LLM call failed: %s", e)
@@ -118,10 +125,11 @@ def complete(system: str, user: str) -> str | None:
 def generate(system: str, question: str, context: str, memories: list[str]) -> str:
     if not context.strip():
         return EMPTY
-    user = f"User memories:\n{chr(10).join(memories) or 'none'}\n\nContext:\n{context}\n\nQuestion: {question}"
+    ctx = context if len(context) <= settings.llm_context_chars else context[: settings.llm_context_chars] + "\n…"
+    user = f"User memories:\n{chr(10).join(memories) or 'none'}\n\nContext:\n{ctx}\n\nQuestion: {question}"
     out = complete(system, user)
     if not out or not out.strip():
         return extractive(context)
     if out.startswith("(LLM unavailable"):
-        return out + "\n\n" + extractive(context)
+        return extractive(context).replace(_NO_LLM_NOTE, "").rstrip() + "\n\n" + BUSY
     return _ODD_CITES.sub("", out).replace(" \n", "\n").strip()

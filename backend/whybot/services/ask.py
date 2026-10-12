@@ -26,23 +26,26 @@ def _features(graph: bool, persona: str | None, paths: list[str]) -> list[str]:
     return feats
 
 
-def _compute(question: str, persona: str | None, graph: bool) -> Answer:
+def _compute(question: str, persona: str | None, graph: bool, write: bool = True) -> Answer:
     t0 = time.perf_counter()
     memories = state.memories(persona)
     r = retrieve(question, persona, graph)
-    text = llm.generate(llm.ANSWER_SYSTEM, question, r.context, memories)
+    # write=False: show what retrieval alone returns (used for the "plain search" side of compare).
+    text = llm.generate(llm.ANSWER_SYSTEM, question, r.context, memories) if write else llm.extractive(r.context)
     return Answer(text, r.chunks, r.paths, memories, r.mode, int((time.perf_counter() - t0) * 1000),
                   _features(graph, persona, r.paths))
 
 
-def ask(question: str, persona: str | None = None, graph: bool = True, count: bool = True) -> Answer:
+def ask(question: str, persona: str | None = None, graph: bool = True, count: bool = True, write: bool = True) -> Answer:
     question = clean(question)
     if not question:
         raise ValueError("Question is empty.")
     persona = clean(persona) or None
-    key = ("ask", question.lower(), persona, graph, state.version)
+    key = ("ask", question.lower(), persona, graph, write, state.version)
     t0 = time.perf_counter()
-    ans, hit = answers.get_or_set(key, lambda: _compute(question, persona, graph))
+    ans, hit = answers.get_or_set(key, lambda: _compute(question, persona, graph, write))
+    if not hit and llm.BUSY in ans.answer:  # never cache a degraded answer
+        answers.drop(key)
     if hit:  # report real latency for cache hits
         ans = replace(ans, latency_ms=int((time.perf_counter() - t0) * 1000))
     if ans.paths:
@@ -54,7 +57,7 @@ def ask(question: str, persona: str | None = None, graph: bool = True, count: bo
 
 def compare(question: str, persona: str | None = None) -> dict[str, Answer]:
     """Plain vs graph answers computed in parallel (≈ half the wall time of running them in sequence)."""
-    plain = _pool.submit(ask, question, persona, False, False)
+    plain = _pool.submit(ask, question, persona, False, False, False)  # retrieval only: one LLM call per compare
     smart = _pool.submit(ask, question, persona, True, False)
     result = {"without_graph": plain.result(), "with_graph": smart.result()}
     state.count_question()
