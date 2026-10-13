@@ -49,6 +49,11 @@ export default function ImpactPage() {
     try { setR(await api.impact(c, persona)); refreshHealth(); } catch (e) { setErr((e as Error).message); refreshHealth(); }
     setBusy(false);
   };
+  useEffect(() => {  // deep link from the graph explorer: /impact?change=...
+    const c = new URLSearchParams(window.location.search).get("change");
+    if (c) run(c);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const copy = (t: string) => { navigator.clipboard?.writeText(t); toast("Message copied"); };
   const ripple = r ? r.affected.filter((a) => a.hop > 0) : [];
 

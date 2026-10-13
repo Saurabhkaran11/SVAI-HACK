@@ -24,7 +24,7 @@ export default function GraphPage() {
   return (
     <>
       <PageHead title={<>Graph <span className="grad">explorer</span></>}
-        sub="Every relationship WhyBot has discovered across your knowledge. Drag nodes, zoom, or search to focus on one person, service or decision." />
+        sub="Every relationship WhyBot has discovered. Hover a node to trace its links, click it for details and its blast radius, filter by relationship type, or search to glide to one service, team or decision." />
 
       <div className="glass card">
         <div className="row wrap">
@@ -42,7 +42,7 @@ export default function GraphPage() {
           ))}
           {focus && <button className="chip" onClick={() => setFocus("")}>Clear focus ✕</button>}
         </div>
-        {edges.length ? <GraphView paths={edges} height={560} focus={focus} />
+        {edges.length ? <GraphView paths={edges} height={560} focus={focus} explorer />
           : loaded && <div className="empty">No relationships yet. <Link href="/" className="grad"><b>Ask a question</b></Link> with graph context on, or load starter data on the Knowledge page.</div>}
       </div>
 

@@ -179,3 +179,27 @@ input[type=range] { accent-color: var(--accent); }
   .chip { white-space: normal; text-align: left; }
   .grid4 { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- graph explorer ---------- */
+.gx { margin-top: 14px; }
+.gx-bar { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 10px; }
+.gx-rels { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.gx-rel { font-size: 12.5px; padding: 5px 10px; border-radius: 999px; cursor: pointer; border: 1px solid #dbe5ff; background: var(--accent-soft); color: var(--accent); transition: background .15s, color .15s, border-color .15s; }
+.gx-rel span { opacity: .7; margin-left: 2px; }
+.gx-rel.off { background: var(--surface); color: var(--faint); border-color: var(--stroke); text-decoration: line-through; }
+.gx-tools { display: flex; gap: 6px; flex-shrink: 0; }
+.gx-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+.gx-stage.with-panel { grid-template-columns: minmax(0, 1fr) 280px; }
+.gx-canvas-wrap { min-width: 0; }
+.gx-canvas { margin-top: 0; background-image: radial-gradient(#e3e7ee 1px, transparent 1px); background-size: 18px 18px; }
+.gx-hint { font-size: 12px; color: var(--faint); margin-top: 8px; }
+.gx-panel { border: 1px solid var(--stroke); border-radius: 10px; background: var(--surface); padding: 14px; overflow-y: auto; box-shadow: 0 8px 24px rgba(16,24,40,.06); }
+.gx-panel h4 { margin: 2px 0 2px; font-size: 16px; word-break: break-word; }
+.gx-cta { width: 100%; margin: 12px 0 6px; padding: 9px 12px; }
+.gx-sec { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); font-weight: 600; margin: 12px 0 4px; }
+.gx-link { display: flex; align-items: center; gap: 6px; width: 100%; text-align: left; padding: 7px 8px; border-radius: 6px; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text); }
+.gx-link:hover { background: var(--accent-soft); }
+.gx-link svg { color: var(--faint); flex-shrink: 0; }
+.gx-link b { font-weight: 600; word-break: break-word; }
+.gx-rel-word { color: var(--muted); font-size: 12px; white-space: nowrap; }
+@media (max-width: 900px) { .gx-stage.with-panel { grid-template-columns: minmax(0, 1fr); } }
