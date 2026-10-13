@@ -9,7 +9,7 @@ from whybot.api import guard
 
 @pytest.fixture()
 def public(monkeypatch):
-    s = dataclasses.replace(config_mod.settings, public_mode=True, admin_token="secret")
+    s = dataclasses.replace(config_mod.settings, public_mode=True, admin_token="secret", trusted_proxy_hops=1)
     monkeypatch.setattr(guard, "settings", s)
     monkeypatch.setattr(guard, "ai_limit", guard.SlidingWindow(3, 60))
     monkeypatch.setattr(guard, "ingest_limit", guard.SlidingWindow(2, 3600))
@@ -56,3 +56,20 @@ def test_private_mode_is_unchanged(sample):
     for _ in range(15):
         assert sample.post("/ask", json={"question": "Who owns billing-service?"}).status_code == 200
     assert sample.post("/reset").status_code == 200
+
+
+def test_forged_forwarded_for_cannot_dodge_the_limit(sample, monkeypatch):
+    """Render edge + Next.js each append one address; the visitor is 2 from the right. Forged prefixes are ignored."""
+    s = dataclasses.replace(config_mod.settings, public_mode=True, trusted_proxy_hops=2)
+    monkeypatch.setattr(guard, "settings", s)
+    monkeypatch.setattr(guard, "ai_limit", guard.SlidingWindow(2, 60))
+    q = {"question": "Who owns billing-service?"}
+    hdr = lambda forged: {"X-Forwarded-For": f"{forged}, 7.7.7.7, 10.0.0.1"}
+    assert sample.post("/ask", json=q, headers=hdr("1.1.1.1")).status_code == 200
+    assert sample.post("/ask", json=q, headers=hdr("2.2.2.2")).status_code == 200
+    assert sample.post("/ask", json=q, headers=hdr("3.3.3.3")).status_code == 429   # same real visitor
+    assert sample.post("/ask", json=q, headers={"X-Forwarded-For": "8.8.8.8, 10.0.0.1"}).status_code == 200
+
+
+def test_health_reports_public_mode(client):
+    assert client.get("/health").json()["public"] is False

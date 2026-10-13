@@ -43,6 +43,11 @@ export default function AskPage() {
     <>
       <PageHead title={<>Ask across <span className="grad">everything</span> your team knows.</>}
         sub="WhyBot links docs, chats and tickets into a knowledge graph. Answers come with who owns it, what depends on it, and sources — tailored to who's asking." />
+      {health?.public && (
+        <div className="demo-note" role="note">
+          <b>Public demo:</b> everyone shares one brain. Add your own public docs on the Knowledge page, then ask about them here.
+        </div>
+      )}
 
       {health && health.docs === 0 && (
         <motion.div className="glass card row wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ justifyContent: "space-between" }}>

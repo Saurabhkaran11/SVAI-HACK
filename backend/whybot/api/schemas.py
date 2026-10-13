@@ -128,6 +128,7 @@ class HealthOut(BaseModel):
     cache: dict
     starter_questions: list[str]
     sample_questions: list[str]
+    public: bool = False
 
 
 class Ok(BaseModel):

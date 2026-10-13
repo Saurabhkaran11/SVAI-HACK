@@ -25,7 +25,7 @@ def health():
         "ok": True, "mode": settings.mode, "database": settings.database, "docs": docs,
         "sample_loaded": sample, "questions": questions, "edges": len(state.all_edges()),
         "llm": llm.provider(), "version": __version__, "cache": answers.stats(),
-        "starter_questions": sd.STARTER_QUESTIONS, "sample_questions": sd.SAMPLE_QUESTIONS,
+        "starter_questions": sd.STARTER_QUESTIONS, "sample_questions": sd.SAMPLE_QUESTIONS, "public": settings.public_mode,
     }
 
 

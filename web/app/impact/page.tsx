@@ -14,7 +14,6 @@ import { useStore } from "../../lib/store";
 const EXAMPLES = [
   "Deprecate payments-api-v1 next month",
   "Turn off the billing-service feature flag use_payments_v2",
-  "Priya Patel goes on leave for 6 weeks",
   "Migrate auth-service to a new rate-limit-config",
 ];
 

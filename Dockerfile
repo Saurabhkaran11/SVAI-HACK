@@ -28,6 +28,7 @@ ENV PORT=3000 \
     NEXT_TELEMETRY_DISABLED=1 \
     STATE_FILE=/tmp/whybot_state.json \
     PUBLIC_MODE=1 \
+    TRUSTED_PROXY_HOPS=2 \
     HYDRA_DATABASE=whybotpublic \
     MAX_UPLOAD_MB=10 \
     AUTO_SAMPLE=1

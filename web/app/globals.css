@@ -5,7 +5,7 @@
   --subtle: #f7f8fa;
   --text: #111827;
   --muted: #4b5563;
-  --faint: #8a94a6;
+  --faint: #6b7280;
   --accent: #2563eb;
   --accent2: #2563eb;
   --accent-soft: #eff4ff;
@@ -164,6 +164,7 @@ details.fold summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .shimmer { height: 12px; border-radius: 6px; margin: 10px 0; background: linear-gradient(90deg, #f1f3f6, #e5e8ed, #f1f3f6); background-size: 200% 100%; animation: sh 1.4s infinite; }
 @keyframes sh { to { background-position: -200% 0; } }
 pre.codeblock { white-space: pre-wrap; word-break: break-word; font-size: 12.5px; background: var(--subtle); border: 1px solid var(--stroke); padding: 14px; border-radius: 8px; margin: 10px 0 0; max-height: 360px; overflow: auto; font-family: ui-monospace, Menlo, monospace; color: var(--text); }
+.demo-note { margin: 0 0 16px; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; line-height: 1.5; color: var(--text); background: var(--accent-soft); border: 1px solid #dbe5ff; }
 .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
 input[type=range] { accent-color: var(--accent); }
 

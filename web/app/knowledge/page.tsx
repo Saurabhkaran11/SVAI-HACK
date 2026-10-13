@@ -49,6 +49,13 @@ export default function KnowledgePage() {
       <PageHead title={<>Feed the <span className="grad">brain</span></>}
         sub="Drop in real files or point WhyBot at any public docs site. HydraDB extracts entities and relationships automatically." />
 
+      {health?.public && (
+        <div className="demo-note" role="note">
+          <b>Public demo:</b> anything you add here is visible to every visitor and is cleared when the server restarts.
+          Use public pages or sample files, not confidential company data.
+        </div>
+      )}
+
       <div className="grid2">
         <motion.label className={`drop glass ${over ? "over" : ""}`}
           onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}

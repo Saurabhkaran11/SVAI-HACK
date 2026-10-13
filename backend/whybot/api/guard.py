@@ -49,9 +49,11 @@ ingest_limit = SlidingWindow(settings.rate_ingest_per_hour, 3600)
 
 
 def client_ip(request: Request) -> str:
-    fwd = request.headers.get("x-forwarded-for", "")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    """The visitor's address as seen by our own proxies — never the client-controlled left end of the header."""
+    hops = settings.trusted_proxy_hops
+    parts = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    if hops > 0 and parts:
+        return parts[-hops] if len(parts) >= hops else parts[0]
     return request.client.host if request.client else "unknown"
 
 

@@ -5,7 +5,7 @@ set -e
 # Never send internal localhost traffic through an outbound proxy.
 export NO_PROXY="127.0.0.1,localhost${NO_PROXY:+,$NO_PROXY}" no_proxy="127.0.0.1,localhost${no_proxy:+,$no_proxy}"
 cd /app/backend
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips="*" &
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
 ENGINE=$!
 
 i=0

@@ -20,6 +20,7 @@ export type Health = {
   edges: number;
   starter_questions: string[];
   sample_questions: string[];
+  public?: boolean;
 };
 export type Impact = {
   change: string; seeds: string[];
