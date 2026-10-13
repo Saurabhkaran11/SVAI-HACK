@@ -43,7 +43,7 @@ class Settings:
     # Public deployment guardrails (see whybot/api/guard.py)
     public_mode: bool = _bool("PUBLIC_MODE")
     admin_token: str = os.getenv("ADMIN_TOKEN", "")
-    # How many proxies append to X-Forwarded-For in front of the engine (Render edge + Next.js = 2).
+    # How many proxies append to X-Forwarded-For in front of the engine (Render: 1, verified live; the Next.js proxy does not append).
     # The visitor's real address is that many entries from the RIGHT; anything left of it is client-forgeable.
     trusted_proxy_hops: int = int(os.getenv("TRUSTED_PROXY_HOPS", "0"))
     rate_ai_per_min: int = int(os.getenv("RATE_AI_PER_MIN", "12"))
