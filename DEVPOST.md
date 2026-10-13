@@ -30,7 +30,7 @@ Run Blast Radius automatically on every pull request and change ticket; Slack, J
 **Built with:** hydradb, groq, nextjs, fastapi, python, typescript, motion
 
 ## Try it
-- **Live demo:** https://whybot-ytcu.onrender.com
+- **Live demo:** https://whybot-ytcu.onrender.com (test guide with real post-mortems: https://github.com/Saurabhkaran11/SVAI-HACK/blob/main/TRY_IT.md)
 - **Code:** https://github.com/Saurabhkaran11/SVAI-HACK
 - **Run locally (macOS):** right-click `WhyBot.command` → Open. First run installs everything, then opens http://localhost:3000
 - **Keys:** `backend/.env` — HydraDB key + any OpenAI-compatible LLM (we used Groq `openai/gpt-oss-120b`); works offline with `MOCK_MODE=1`
