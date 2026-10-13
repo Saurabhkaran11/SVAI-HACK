@@ -50,7 +50,7 @@ If you change `BACKEND_URL` later, redeploy on Vercel for it to take effect.
 | `MAX_UPLOAD_MB` | `10` | Largest file a visitor can upload |
 | `ADMIN_TOKEN` | generated | Only requests with header `X-Admin-Token` can reset the brain |
 | `AUTO_SAMPLE` | `1` | Reloads the starter brain whenever the server restarts |
-| `HYDRA_DATABASE` | `whybotpublic` | Keeps public uploads separate from your local demo brain |
+| `HYDRA_DATABASE` | `whybotpublic` | Keeps public uploads separate from your local demo brain (set in the Dockerfile; override in the host's environment) |
 
 Everyone who visits shares **one** brain and **one** free Groq quota (about 8,000 tokens a minute). When Groq is busy, visitors get the evidence summary with a "try again in a minute" note instead of an error.
 

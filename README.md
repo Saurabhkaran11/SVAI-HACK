@@ -4,6 +4,8 @@
 
 **What makes WhyBot different:** most "company brain" tools answer questions. WhyBot also answers the question nobody asks until it's too late: **"If we change this, what breaks, who do we tell, and what went wrong last time?"** It walks a HydraDB knowledge graph hop by hop, scores the risk, and drafts the heads-up messages to every owning team.
 
+**Live demo:** https://whybot-ytcu.onrender.com  (free tier: first load after idle takes ~1 min)
+
 ## Features
 | Feature | What it does | HydraDB features used |
 |---|---|---|
