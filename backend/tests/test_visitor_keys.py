@@ -105,9 +105,13 @@ def test_key_is_only_read_on_ai_routes(sample, fake_llm):
 def test_a_bad_request_about_the_key_counts_as_rejected_but_others_do_not(sample, monkeypatch):
     class Bad(Exception):
         status_code = 400
+        body = None
+
+    class BadKey(Bad):  # Gemini's real shape: the exception text is bare and the reason is in the body
+        body = [{"error": {"code": 400, "message": "Please pass a valid API key", "status": "INVALID_ARGUMENT"}}]
 
     def about_key(*_):
-        raise Bad("API key not valid. Please pass a valid API key.")
+        raise BadKey("Error code: 400")
 
     def other(*_):
         raise Bad("model not found")
