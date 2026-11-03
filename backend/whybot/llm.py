@@ -194,7 +194,9 @@ def complete(system: str, user: str) -> str | None:
     except Exception as e:
         # Log only the type: provider messages can quote part of the key.
         log.warning("LLM call failed: %s", type(e).__name__)
-        if getattr(e, "status_code", None) in (401, 403):
+        status = getattr(e, "status_code", None)
+        # Gemini answers a bad key with a 400 instead of a 401.
+        if status in (401, 403) or (status == 400 and "api key" in str(e).lower()):
             return "(LLM key rejected)"
         return f"(LLM unavailable: {type(e).__name__})"
     return None

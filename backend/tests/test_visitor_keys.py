@@ -100,3 +100,19 @@ def test_rejected_key_is_explained_not_cached_and_not_logged(sample, monkeypatch
 def test_key_is_only_read_on_ai_routes(sample, fake_llm):
     sample.post("/memory", json={"persona": "engineer", "text": "likes bullets"}, headers=HEADERS)
     assert fake_llm == []
+
+
+def test_a_bad_request_about_the_key_counts_as_rejected_but_others_do_not(sample, monkeypatch):
+    class Bad(Exception):
+        status_code = 400
+
+    def about_key(*_):
+        raise Bad("API key not valid. Please pass a valid API key.")
+
+    def other(*_):
+        raise Bad("model not found")
+
+    monkeypatch.setattr(llm, "_visitor_complete", about_key)
+    assert llm.KEY_REJECTED in sample.post("/ask", json={"question": "key test billing-service gemini"}, headers=HEADERS).json()["answer"]
+    monkeypatch.setattr(llm, "_visitor_complete", other)
+    assert llm.BUSY in sample.post("/ask", json={"question": "key test billing-service other"}, headers=HEADERS).json()["answer"]
