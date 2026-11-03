@@ -3,12 +3,18 @@ import { AnimatePresence, motion } from "motion/react";
 import { X, RotateCcw, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "../lib/store";
-import { api } from "../lib/api";
+import { api, getVisitorKey, setVisitorKey } from "../lib/api";
 import Toggle from "./Toggle";
 
 export default function SettingsDrawer() {
   const { settingsOpen, setSettingsOpen, settings, setSettings, personas, health, refreshHealth, refreshPersonas, toast, setPersona } = useStore();
   const [confirm, setConfirm] = useState(false);
+  const [aiProvider, setAiProvider] = useState(getVisitorKey()?.provider ?? "anthropic");
+  const [aiKey, setAiKey] = useState(getVisitorKey()?.key ?? "");
+  const saveKey = (provider: string, key: string) => {
+    setAiProvider(provider); setAiKey(key);
+    setVisitorKey(key.trim() ? { provider, key: key.trim() } : null);
+  };
 
   const reset = async () => {
     await api.reset(); await refreshHealth(); await refreshPersonas(); setPersona("engineer");
@@ -49,6 +55,24 @@ export default function SettingsDrawer() {
                 onChange={(e) => setSettings({ defaultPersona: e.target.value })}>
                 {Object.entries(personas).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
+            </div>
+
+            <h3 className="faint" style={{ fontSize: 12, letterSpacing: ".12em", margin: "22px 0 4px" }}>YOUR AI KEY</h3>
+            <div className="setting">
+              <div><b>AI provider</b><span>Without a key you get an evidence summary</span></div>
+              <select className="select" style={{ width: 170 }} aria-label="AI provider" value={aiProvider}
+                onChange={(e) => saveKey(e.target.value, aiKey)}>
+                <option value="anthropic">Anthropic</option>
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq (free tier)</option>
+                <option value="gemini">Gemini (free tier)</option>
+              </select>
+            </div>
+            <div className="setting">
+              <div><b>API key</b><span>Billed to your account. Not saved or logged, and cleared when you close this tab.</span></div>
+              <input className="select" style={{ width: 170 }} type="password" autoComplete="off" spellCheck={false}
+                aria-label="Your API key" placeholder="Paste your key" value={aiKey}
+                onChange={(e) => saveKey(aiProvider, e.target.value)} />
             </div>
 
             <h3 className="faint" style={{ fontSize: 12, letterSpacing: ".12em", margin: "22px 0 4px" }}>CONNECTION</h3>

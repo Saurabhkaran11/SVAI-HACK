@@ -21,9 +21,8 @@ Free Render services sleep after 15 minutes without visitors; the first visit af
 2. **New → Blueprint** → choose the `SVAI-HACK` repo → **Apply**. Render reads `render.yaml`.
 3. When asked, paste your two secret keys:
    - `HYDRA_DB_API_KEY`: from your HydraDB dashboard.
-   - `OPENAI_API_KEY`: your Groq key (`gsk_…`) from https://console.groq.com/keys.
 4. Wait for the first build (about 5–8 minutes). Open the URL Render shows, e.g. `https://whybot.onrender.com`.
-5. Check: `https://<your-url>/api/health` should say `"mode": "hydradb"` and `"llm": "groq"`.
+5. Check: `https://<your-url>/api/health` should say `"mode": "hydradb"` and `"llm": "visitor-key"`.
 
 Every push to `main` redeploys automatically.
 
@@ -52,7 +51,7 @@ If you change `BACKEND_URL` later, redeploy on Vercel for it to take effect.
 | `AUTO_SAMPLE` | `1` | Reloads the starter brain whenever the server restarts |
 | `HYDRA_DATABASE` | `whybotpublic` | Keeps public uploads separate from your local demo brain (set in the Dockerfile; override in the host's environment) |
 
-Everyone who visits shares **one** brain and **one** free Groq quota (about 8,000 tokens a minute). When Groq is busy, visitors get the evidence summary with a "try again in a minute" note instead of an error.
+Everyone who visits shares **one** brain. Each visitor adds their own AI key in Settings and pays for their own usage. Without a key, they get an evidence summary.
 
 Reset the public brain yourself:
 

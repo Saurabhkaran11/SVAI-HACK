@@ -33,6 +33,13 @@ export type Impact = {
 export type InventoryRow = { id: string; title: string; type: string; status?: string };
 export type Persona = { label: string; memories: string[] };
 
+// The visitor's own AI key. Kept in memory only, so it's gone when the tab closes, and sent only with AI requests.
+export type VisitorKey = { provider: string; key: string };
+let visitorKey: VisitorKey | null = null;
+export const setVisitorKey = (value: VisitorKey | null) => { visitorKey = value; };
+export const getVisitorKey = () => visitorKey;
+const AI_PATHS = ["/ask", "/compare", "/impact"];
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   let r: Response;
   try {
@@ -53,8 +60,14 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   }
   return r.json();
 }
-const post = <T,>(path: string, body: unknown = {}) =>
-  req<T>(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+const post = <T,>(path: string, body: unknown = {}) => {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (visitorKey && AI_PATHS.includes(path)) {
+    headers["X-LLM-Provider"] = visitorKey.provider;
+    headers["X-LLM-Key"] = visitorKey.key;
+  }
+  return req<T>(path, { method: "POST", headers, body: JSON.stringify(body) });
+};
 
 export const api = {
   health: () => req<Health>("/health"),

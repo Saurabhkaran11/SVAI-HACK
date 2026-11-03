@@ -1,7 +1,7 @@
 """Routers grouped by feature. Handlers only translate HTTP <-> services."""
 from __future__ import annotations
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
 
 from .. import __version__, llm
 from .. import sample_data as sd
@@ -41,7 +41,19 @@ def reset():
 
 
 # ---- ask & impact ----------------------------------------------------------------
-brain = APIRouter(tags=["Ask & Blast Radius"])
+async def visitor_key(x_llm_provider: str | None = Header(default=None), x_llm_key: str | None = Header(default=None)):
+    """Use the visitor's own AI key for this request. Without one, answers are evidence summaries."""
+    key = (x_llm_key or "").strip()
+    if not key:
+        return
+    if x_llm_provider not in llm.PROVIDERS:
+        raise HTTPException(status_code=400, detail="Choose a supported AI provider.")
+    if len(key) > 400 or any(c.isspace() for c in key):
+        raise HTTPException(status_code=400, detail="That does not look like an API key.")
+    llm.use_visitor_key(x_llm_provider, key)
+
+
+brain = APIRouter(tags=["Ask & Blast Radius"], dependencies=[Depends(visitor_key)])
 
 
 @brain.post("/ask", response_model=s.AnswerOut, summary="Answer a question with graph + persona context")

@@ -94,9 +94,9 @@ def blast_radius(change: str, persona: str | None = None) -> dict:
     if not change:
         raise ValueError("Describe the change you're planning.")
     t0 = time.perf_counter()
-    key = ("impact", change.lower(), persona, state.version)
+    key = ("impact", change.lower(), persona, state.version, llm.cache_scope())
     result, hit = answers.get_or_set(key, lambda: _compute(change, persona))
-    if not hit and llm.BUSY in result["brief"]:  # never cache a degraded brief
+    if not hit and llm.degraded(result["brief"]):  # never cache a degraded brief
         answers.drop(key)
     out = {k: v for k, v in result.items() if not k.startswith("_")}
     if hit:

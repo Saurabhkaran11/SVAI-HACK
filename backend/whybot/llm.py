@@ -2,6 +2,7 @@
 or a clean evidence summary when no LLM is configured."""
 from __future__ import annotations
 
+import contextvars
 import logging
 import re
 from functools import lru_cache
@@ -23,7 +24,39 @@ IMPACT_SYSTEM = (
 )
 _ODD_CITES = re.compile(r"【[^】]{0,40}】")  # e.g. 【1†L13-L15】 from some open models
 BUSY = "_The AI writer is busy right now (rate limit or timeout), so this is the evidence summary. Ask again in a minute for a written answer._"
+KEY_REJECTED = "_Your AI provider rejected that key, so this is the evidence summary. Check the key in Settings and try again._"
 EMPTY = "I don't have anything on that yet. Add docs, notes or a URL to your brain and ask again."
+
+
+# Visitors bring their own key. Base URLs are fixed so a key can only ever go to its real provider.
+PROVIDERS = {
+    "anthropic": {"label": "Anthropic"},
+    "openai": {"label": "OpenAI", "base_url": None, "model": "gpt-4o-mini"},
+    "groq": {"label": "Groq", "base_url": "https://api.groq.com/openai/v1", "model": "openai/gpt-oss-120b"},
+    "gemini": {"label": "Gemini", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.5-flash"},
+}
+_visitor: contextvars.ContextVar[tuple[str, str] | None] = contextvars.ContextVar("whybot_visitor_key", default=None)
+
+
+def use_visitor_key(provider_name: str, key: str) -> None:
+    """Set the key for this request only. It lives in memory for the request and is never stored or logged."""
+    _visitor.set((provider_name, key))
+
+
+def _server_key_allowed() -> bool:
+    """A public deployment never spends the owner's key. Local runs can still use .env."""
+    return not settings.public_mode
+
+
+def cache_scope() -> str:
+    """Written answers and evidence summaries are cached separately, so a visitor with a key never gets a stale summary."""
+    if _visitor.get():
+        return "written"
+    return "written" if _server_key_allowed() and (settings.anthropic_key or _openai_enabled()) else "evidence"
+
+
+def degraded(text: str) -> bool:
+    return BUSY in text or KEY_REJECTED in text
 
 
 @lru_cache(maxsize=1)
@@ -47,6 +80,8 @@ def _openai_enabled() -> bool:
 
 
 def provider() -> str:
+    if settings.public_mode:
+        return "visitor-key"
     if settings.anthropic_key:
         return "claude"
     if not _openai_enabled():
@@ -58,7 +93,7 @@ def provider() -> str:
     return "openai-compatible" if url else "openai"
 
 
-_NO_LLM_NOTE = "\n_Evidence summary. Add a free LLM (see backend/.env) for a written, cited answer._"
+_NO_LLM_NOTE = "\n_Evidence summary. Add your own AI key in Settings for a written, cited answer._"
 
 
 def extractive(context: str) -> str:
@@ -117,8 +152,33 @@ def passages(chunks, limit: int = 4) -> str:
     return "\n".join(out) if len(out) > 1 else EMPTY
 
 
+def _visitor_complete(provider_name: str, key: str, system: str, user: str) -> str:
+    if provider_name == "anthropic":
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=key, timeout=settings.llm_timeout_s, max_retries=0)
+        msg = client.messages.create(model=settings.anthropic_model, max_tokens=settings.llm_max_tokens,
+                                     system=system, messages=[{"role": "user", "content": user}])
+        return "".join(getattr(b, "text", "") for b in msg.content).strip()
+    from openai import OpenAI
+
+    conf = PROVIDERS[provider_name]
+    client = OpenAI(api_key=key, base_url=conf["base_url"], timeout=settings.llm_timeout_s, max_retries=0)
+    extra: dict = {}
+    if "gpt-oss" in conf["model"]:
+        extra = {"extra_body": {"reasoning_effort": "low", "max_completion_tokens": settings.llm_max_tokens * 2}}
+    r = client.chat.completions.create(model=conf["model"], messages=[{"role": "system", "content": system},
+                                                                      {"role": "user", "content": user}], **extra)
+    return (r.choices[0].message.content or "").strip()
+
+
 def complete(system: str, user: str) -> str | None:
     try:
+        visitor = _visitor.get()
+        if visitor:
+            return _visitor_complete(visitor[0], visitor[1], system, user)
+        if not _server_key_allowed():
+            return None
         if settings.anthropic_key:
             msg = _anthropic().messages.create(model=settings.anthropic_model, max_tokens=settings.llm_max_tokens,
                                                system=system, messages=[{"role": "user", "content": user}])
@@ -132,7 +192,10 @@ def complete(system: str, user: str) -> str | None:
                                                             {"role": "user", "content": user}], **extra)
             return (r.choices[0].message.content or "").strip()
     except Exception as e:
-        log.warning("LLM call failed: %s", e)
+        # Log only the type: provider messages can quote part of the key.
+        log.warning("LLM call failed: %s", type(e).__name__)
+        if getattr(e, "status_code", None) in (401, 403):
+            return "(LLM key rejected)"
         return f"(LLM unavailable: {type(e).__name__})"
     return None
 
@@ -145,6 +208,8 @@ def generate(system: str, question: str, context: str, memories: list[str]) -> s
     out = complete(system, user)
     if not out or not out.strip():
         return extractive(context)
+    if out == "(LLM key rejected)":
+        return extractive(context).replace(_NO_LLM_NOTE, "").rstrip() + "\n\n" + KEY_REJECTED
     if out.startswith("(LLM unavailable"):
         return extractive(context).replace(_NO_LLM_NOTE, "").rstrip() + "\n\n" + BUSY
     return _ODD_CITES.sub("", out).replace(" \n", "\n").strip()

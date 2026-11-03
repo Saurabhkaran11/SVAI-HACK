@@ -1,5 +1,5 @@
 # One-click deploy on Render: Dashboard → New → Blueprint → pick this repo.
-# You'll be asked for the two secret keys; everything else is preset.
+# You'll be asked for your HydraDB key. Visitors add their own AI keys in the app's Settings.
 services:
   - type: web
     name: whybot
@@ -11,12 +11,6 @@ services:
     envVars:
       - key: HYDRA_DB_API_KEY        # from hydradb.com dashboard
         sync: false
-      - key: OPENAI_API_KEY          # your Groq key (gsk_...) from console.groq.com
-        sync: false
-      - key: OPENAI_BASE_URL
-        value: https://api.groq.com/openai/v1
-      - key: OPENAI_MODEL
-        value: openai/gpt-oss-120b
       - key: HYDRA_DATABASE          # separate from your local demo brain
         value: whybotpublic
       - key: PUBLIC_MODE

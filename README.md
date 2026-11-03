@@ -29,6 +29,8 @@ cd web && npm install && npm run build && cd ..
 ```
 Keys: HydraDB → https://app.hydradb.com · Claude → https://console.anthropic.com (or set `OPENAI_API_KEY`).
 
+**AI keys on a public deployment:** visitors add their own Anthropic, OpenAI, Groq or Gemini key in Settings. It's sent only with AI requests, used for that request, and never stored or logged. Without a key, WhyBot still works and gives an evidence summary. Your own keys in `.env` are only used when `PUBLIC_MODE` is off. The HydraDB key belongs to the deployment and stays a private environment variable.
+
 ## Run
 ```bash
 ./start.sh          # Windows: start.bat     (./start.sh dev for hot reload)

@@ -1,6 +1,7 @@
 """Ask the Brain: graph-aware, persona-aware answers, plus side-by-side comparison."""
 from __future__ import annotations
 
+import contextvars
 import time
 from dataclasses import replace
 from concurrent.futures import ThreadPoolExecutor
@@ -41,10 +42,10 @@ def ask(question: str, persona: str | None = None, graph: bool = True, count: bo
     if not question:
         raise ValueError("Question is empty.")
     persona = clean(persona) or None
-    key = ("ask", question.lower(), persona, graph, write, state.version)
+    key = ("ask", question.lower(), persona, graph, write, state.version, llm.cache_scope())
     t0 = time.perf_counter()
     ans, hit = answers.get_or_set(key, lambda: _compute(question, persona, graph, write))
-    if not hit and llm.BUSY in ans.answer:  # never cache a degraded answer
+    if not hit and llm.degraded(ans.answer):  # never cache a degraded answer
         answers.drop(key)
     if hit:  # report real latency for cache hits
         ans = replace(ans, latency_ms=int((time.perf_counter() - t0) * 1000))
@@ -57,8 +58,9 @@ def ask(question: str, persona: str | None = None, graph: bool = True, count: bo
 
 def compare(question: str, persona: str | None = None) -> dict[str, Answer]:
     """Plain vs graph answers computed in parallel (≈ half the wall time of running them in sequence)."""
-    plain = _pool.submit(ask, question, persona, False, False, False)  # retrieval only: one LLM call per compare
-    smart = _pool.submit(ask, question, persona, True, False)
+    # Each worker gets a copy of this request's context, which carries the visitor's key.
+    plain = _pool.submit(contextvars.copy_context().run, ask, question, persona, False, False, False)  # retrieval only: one LLM call per compare
+    smart = _pool.submit(contextvars.copy_context().run, ask, question, persona, True, False)
     result = {"without_graph": plain.result(), "with_graph": smart.result()}
     state.count_question()
     return result
